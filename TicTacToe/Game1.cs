@@ -77,9 +77,8 @@ namespace TicTacToe
 			else if (ClickedButtons.Contains(Keys.NumPad8)) PosToPlay = KeyToPos(8);
 			else if (ClickedButtons.Contains(Keys.NumPad9)) PosToPlay = KeyToPos(9);
 
-			if (PosToPlay != new Point(-1))
+			if (PosToPlay != new Point(-1) && Tile.tiles[PosToPlay.X, PosToPlay.Y].Play(PlayerToPlay))
 			{
-				Tile.tiles[PosToPlay.X, PosToPlay.Y].Play(PlayerToPlay);
 				PlayerToPlay = PlayerToPlay == State.Cross ? State.Nought : State.Cross;
 
 				Won = CheckForWin(out Winner);
@@ -228,16 +227,17 @@ namespace TicTacToe
 			switch (HVD)
 			{
 				case 0:
-					spriteBatch.Draw(ColorTexture, new Rectangle(BoardContainer.Left + CellDimensions.X / 2 + CellDimensions.X * i, BoardContainer.Top, 1, BoardContainer.Height), Color.Black);
+					spriteBatch.Draw(ColorTexture, new Rectangle(BoardContainer.Left + CellDimensions.X / 2 + CellDimensions.X * i, BoardContainer.Top + 30, 1, BoardContainer.Height - 60), Color.Black);
 					break;
 
 				case 1:
-                    spriteBatch.Draw(ColorTexture, new Rectangle(BoardContainer.Left, BoardContainer.Top + CellDimensions.Y / 2 + CellDimensions.Y * i, BoardContainer.Width, 1), Color.Black);
+                    spriteBatch.Draw(ColorTexture, new Rectangle(BoardContainer.Left + 30, BoardContainer.Top + CellDimensions.Y / 2 + CellDimensions.Y * i, BoardContainer.Width - 60, 1), Color.Black);
                     break;
 
 				case 2:
 					// diagonal
-
+					for (int j = 50; j < BoardContainer.Width - 50; j++)
+						spriteBatch.Draw(ColorTexture, new Rectangle(BoardContainer.Left + j, BoardContainer.Top + (i == 0 ? j : BoardContainer.Width - j), 1, 1), Color.Black);
 					break;
 			}
 		}
