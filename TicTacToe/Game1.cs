@@ -7,6 +7,9 @@ namespace TicTacToe
 {
 	public class Game1 : Game
 	{
+		const bool AI_ENABLED = false;
+		const State AI_PLAYER = State.Nought;
+
 		private GraphicsDeviceManager graphics;
 		private SpriteBatch spriteBatch;
 
@@ -55,18 +58,37 @@ namespace TicTacToe
 
 		protected override void Update(GameTime gameTime)
 		{
-			PreviousHeldButtons = CurrentHeldButtons;
+            base.Update(gameTime);
+
+            PreviousHeldButtons = CurrentHeldButtons;
 			CurrentHeldButtons = Keyboard.GetState().GetPressedKeys();
 
 			if (ClickedButtons.Contains(Keys.Escape))
 				Exit();
-			if (Won)
-				if (ClickedButtons.Contains(Keys.Space))
-					Reset();
-				else
-					return;
+            else if (ClickedButtons.Contains(Keys.Space))
+			{
+                Reset();
+                return;
+            }
 
-			Point PosToPlay = new Point(-1);
+            if (Won)
+				return;
+
+
+            if (AI_ENABLED && PlayerToPlay == AI_PLAYER)
+            {
+                Point ThePlay = AI.MiniMax(Tile.tiles, PlayerToPlay);
+                Tile.tiles[ThePlay.X, ThePlay.Y].Play(PlayerToPlay);
+
+                PlayerToPlay = PlayerToPlay == State.Cross ? State.Nought : State.Cross;
+
+                Won = CheckForWin(out Winner);
+
+				return;
+            }
+
+
+            Point PosToPlay = new Point(-1);
 			if (ClickedButtons.Contains(Keys.NumPad1)) PosToPlay = KeyToPos(1);
 			else if (ClickedButtons.Contains(Keys.NumPad2)) PosToPlay = KeyToPos(2);
 			else if (ClickedButtons.Contains(Keys.NumPad3)) PosToPlay = KeyToPos(3);
@@ -82,9 +104,10 @@ namespace TicTacToe
 				PlayerToPlay = PlayerToPlay == State.Cross ? State.Nought : State.Cross;
 
 				Won = CheckForWin(out Winner);
+
+				return;
 			}
 
-			base.Update(gameTime);
 		}
 
 		protected override void Draw(GameTime gameTime)
@@ -103,12 +126,15 @@ namespace TicTacToe
 					spriteBatch.DrawString(text, Tile.tiles[x, y].OutString, new Vector2(BoardContainer.Left + CellDimensions.X / 2 + CellDimensions.X * x, BoardContainer.Top + CellDimensions.Y / 2 + CellDimensions.Y * y) - text.MeasureString(Tile.tiles[x, y].OutString) / 2, Color.Black);
 
 			if (Won)
-			{
-                spriteBatch.DrawString(text, "Player Won:", new Vector2(600, 250) - text.MeasureString("Player Won:") / 2, Color.Black);
-                spriteBatch.DrawString(text, Winner == State.Cross ? "X" : "O", new Vector2(600, 270) - text.MeasureString(Winner == State.Cross ? "X" : "O") / 2, Color.Black);
+				if (Winner == State.Empty)
+                    spriteBatch.DrawString(text, "Draw", new Vector2(600, 260) - text.MeasureString("Draw") / 2, Color.Black);
+				else
+				{
+					spriteBatch.DrawString(text, "Player Won:", new Vector2(600, 250) - text.MeasureString("Player Won:") / 2, Color.Black);
+					spriteBatch.DrawString(text, Winner == State.Cross ? "X" : "O", new Vector2(600, 270) - text.MeasureString(Winner == State.Cross ? "X" : "O") / 2, Color.Black);
 
-				DrawWinLine();
-            }
+					DrawWinLine();
+				}
             else
 			{
 				spriteBatch.DrawString(text, "Next to play:", new Vector2(600, 250) - text.MeasureString("Next to play:") / 2, Color.Black);
@@ -162,6 +188,14 @@ namespace TicTacToe
 		bool CheckForWin(out State Winner)
 		{
 			Winner = State.Empty;
+
+            bool Draw = true;
+            for (int x = 0; x < 3; x++)
+                for (int y = 0; y < 3; y++)
+                    if (Tile.tiles[x, y].OutString == " ")
+                        Draw = false;
+			if (Draw == true) return true;
+
 
             bool[,] Crosses = new bool[3, 3];
 			bool[,] Noughts = new bool[3, 3];

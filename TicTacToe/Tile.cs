@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace TicTacToe
 {
-    internal class Tile
+    internal struct Tile
     {
         public static Tile[,] tiles = new Tile[3, 3];
 
@@ -33,6 +33,8 @@ namespace TicTacToe
         { 
             this.x = x;
             this.y = y;
+
+            state = State.Empty;
         }
 
         public bool Play(State newState)
