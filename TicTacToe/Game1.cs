@@ -7,7 +7,7 @@ namespace TicTacToe
 {
 	public class Game1 : Game
 	{
-		const bool AI_ENABLED = false;
+		const bool AI_ENABLED = true;
 		const State AI_PLAYER = State.Nought;
 
 		private GraphicsDeviceManager graphics;

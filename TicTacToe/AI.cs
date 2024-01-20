@@ -80,11 +80,29 @@ namespace TicTacToe
                 for each child of node do
                     value := min(value, minimax(child, depth − 1, TRUE))
                 return value
-
-        (* Initial call *)
-        minimax(origin, depth, TRUE)
         */
-        static int EvaluateBoardScore(Tile[,] BoardState, State player, int depth)
+        /*
+        function alphabeta(node, depth, α, β, maximizingPlayer) is
+            if depth == 0 or node is terminal then
+                return the heuristic value of node
+            if maximizingPlayer then
+                value := −∞
+                for each child of node do
+                    value := max(value, alphabeta(child, depth − 1, α, β, FALSE))
+                    if value > β then
+                        break (* β cutoff *)
+                    α := max(α, value)
+                return value
+            else
+                value := +∞
+                for each child of node do
+                    value := min(value, alphabeta(child, depth − 1, α, β, TRUE))
+                    if value < α then
+                        break (* α cutoff *)
+                    β := min(β, value)
+                return value
+        */
+        static int EvaluateBoardScore(Tile[,] BoardState, State player, int depth, int alpha = int.MinValue, int beta = int.MaxValue)
         {
             if (player == State.Empty) throw new ArgumentException("Argument 'player' cannot be State.Empty");
 
@@ -112,7 +130,11 @@ namespace TicTacToe
                         Tile[,] NewBoardState = CreateCopy(BoardState);
                         if (!NewBoardState[x, y].Play(player)) continue;
 
-                        Score = Math.Max(Score, EvaluateBoardScore(NewBoardState, State.Nought, depth - 1));
+                        Score = Math.Max(Score, EvaluateBoardScore(NewBoardState, State.Nought, depth - 1, alpha, beta));
+
+                        if (Score > beta)
+                            break;
+                        alpha = Math.Max(alpha, Score);
                     }
                 return Score;
             }
@@ -126,7 +148,11 @@ namespace TicTacToe
                         Tile[,] NewBoardState = CreateCopy(BoardState);
                         if (!NewBoardState[x, y].Play(player)) continue;
 
-                        Score = Math.Min(Score, EvaluateBoardScore(NewBoardState, State.Cross, depth - 1));
+                        Score = Math.Min(Score, EvaluateBoardScore(NewBoardState, State.Cross, depth - 1, alpha, beta));
+
+                        if (Score < alpha)
+                            break;
+                        beta = Math.Min(beta, Score);
                     }
                 return Score;
             }
